@@ -40,7 +40,7 @@ app.get('/api/courses', (req, res) => {
 //get one course GET
 app.get('/api/courses/:id', (req, res) => {
     const course = courses.find(e => e.id === parseInt(req.params.id));
-    if(!course) res.status(404).send('The course with the given id was not found');
+    if(!course) return res.status(404).send('The course with the given id was not found');
     res.send(course);
 })
 //add to courses POST
@@ -76,7 +76,7 @@ app.put('/api/courses/:id', (req,res) => {
     //Look up the course
     //If not existing return 404
     const course = courses.find(e => e.id === parseInt(req.params.id));
-    if(!course) res.status(404).send("The course wiht the given id wasn't found");
+    if(!course) return res.status(404).send("The course with the given id wasn't found");
     
     //Otherwise validate the course
     //If invalid, return 400 - Bad request
@@ -104,6 +104,17 @@ function validateCourse(course){
     });
     return schema.validate(course);
 }
+//DELETE the course
+app.delete('/api/courses/:id', (req, res) => {
+    // Find the courses
+    const course = courses.find(e => e.id === parseInt(req.params.id));
+    if(!course) return res.status(404).send("The course with the given id wasn't found")
+
+    //Delete the course
+    const index = courses.indexOf(course);
+    courses.splice(index, 1);
+    res.send(course);
+})
 
 // lectures
 //get all the lectures
@@ -113,7 +124,7 @@ app.get('/api/lectures', (req, res) => {
 //get one lecture
 app.get('/api/lectures/:id', (req, res) => {
     const lecture = lectures.find(e => e.id === parseInt(req.params.id));
-    if(!lecture) res.status(404).send('The lecture was not found');
+    if(!lecture) return res.status(404).send('The lecture was not found');
     res.send(lecture);
 })
 
@@ -139,7 +150,7 @@ app.post('/api/lectures', (req,res) => {
 app.put('/api/lectures/:id', (req,res) => {
     //Look up the lecture
     const lecture  = lectures.find(e => e.id === parseInt(req.params.id));
-    if(!lecture) res.status(404).send("Lecture with the given id was't found");
+    if(!lecture) return res.status(404).send("Lecture with the given id was't found");
 
     //Otherwise validate
     const { error } = validateLecture(req.body)
@@ -161,8 +172,20 @@ function validateLecture(lecture){
     });
     return schema.validate(lecture);
 }
+// DELETE the lecture
+app.delete('/api/lectures/:id', (req, res) => {
+    //Find the lecture
+    const lecture = lectures.find(e => e.id === parseInt(req.params.id));
+    if(!lecture) return res.status(404).send("The lecture with the given ID wasn's found");
 
+    //Delete the lecture
+    const index = lectures.indexOf(lecture);
+    lectures.splice(index, 1);
 
+    //Return the deleted lecture
+    res.send(lecture);
+
+})
 
 
 
@@ -178,7 +201,7 @@ app.get('/api/profs', (req, res) => {
 
 app.get('/api/profs/:id', (req, res) => {
     const prof = profs.find(e => e.id === parseInt(req.params.id));
-    if(!prof) res.status(404).send('The prof was not found')
+    if(!prof) return res.status(404).send('The prof was not found')
     res.send(prof)
 })
 
@@ -202,7 +225,7 @@ app.post('/api/profs', (req,res) => {
 
 app.put('/api/profs/:id', (req,res) => {
     const prof = profs.find(e => e.id === parseInt(req.params.id));
-    if(!prof) res.status(404).send("The given prof wasn't found")
+    if(!prof) return res.status(404).send("The given prof wasn't found")
 
     const result = validateProf(req.body);
     if(result.error){
@@ -220,6 +243,21 @@ function validateProf(prof){
     })
     return schema.validate(prof);
 }
+
+app.delete('/api/profs/:id', (req, res) => {
+    // Look up the prof
+    const prof = profs.find( e => e.id === parseInt( req.params.id));
+    if(!prof) return res.status(404).send("Prof with the given id wasn't found");
+
+    // DELETE
+    // get the index
+    const index = profs.indexOf(prof);
+    //delete the prof
+    profs.splice(index, 1);
+
+    res.send(prof);
+
+})
 
 
 
