@@ -45,16 +45,25 @@ app.get('/api/courses/:id', (req, res) => {
 })
 //add to courses POST
 app.post('/api/courses', (req, res) => {
-    const schema = Joi.object({
-        name: Joi.string().min(3).required()
-    });
-    const result = schema.validate(req.body)
-    console.log(result);
+    // const schema = Joi.object({
+    //     name: Joi.string().min(3).required()
+    // });
+    // const result = schema.validate(req.body)
+    // console.log(result);
 
-    if(result.error){
-        res.status(400).send(result.error.details[0].message);
-        return;
+    // if(result.error){
+    //     res.status(400).send(result.error.details[0].message);
+    //     return;
+    // }
+
+    // refactoring
+    const { error } = validateCourse(req.body); //result.error
+    
+    if(error){
+        res.status(400).send(error.details[0].message);
+        return
     }
+
     const course = {
         id: courses.length + 1,
         name: req.body.name
@@ -71,13 +80,15 @@ app.put('/api/courses/:id', (req,res) => {
     
     //Otherwise validate the course
     //If invalid, return 400 - Bad request
-    const schema = Joi.object({
-        name: Joi.string().min(3).required()
-    });
-    const result = schema.validate(req.body)
+
+    // const schema = Joi.object({
+    //     name: Joi.string().min(3).required()
+    // });
+    // const result = schema.validate(req.body)
+    const { error } = validateCourse(req.body); //result.error
     
-    if(result.error){
-        res.status(400).send(result.error.details[0].message);
+    if(error){
+        res.status(400).send(error.details[0].message);
         return
     }
     //Update the course
@@ -85,6 +96,14 @@ app.put('/api/courses/:id', (req,res) => {
     course.name = req.body.name;
     res.send(course);
 })
+
+//refactoring the validation by adding validateCourse() method
+function validateCourse(course){
+    const schema = Joi.object({
+        name: Joi.string().min(3).required()
+    });
+    return schema.validate(course);
+}
 
 // lectures
 //get all the lectures
