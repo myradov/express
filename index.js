@@ -27,15 +27,62 @@ const profs = [
 
 
 //courses
+
+
+
 app.get('/', (req, res) => {
     res.send("Hello World");
 });
+//get all the courses GET
 app.get('/api/courses', (req, res) => {
     res.send(courses);
 })
+//get one course GET
 app.get('/api/courses/:id', (req, res) => {
     const course = courses.find(e => e.id === parseInt(req.params.id));
     if(!course) res.status(404).send('The course with the given id was not found');
+    res.send(course);
+})
+//add to courses POST
+app.post('/api/courses', (req, res) => {
+    const schema = Joi.object({
+        name: Joi.string().min(3).required()
+    });
+    const result = schema.validate(req.body)
+    console.log(result);
+
+    if(result.error){
+        res.status(400).send(result.error.details[0].message);
+        return;
+    }
+    const course = {
+        id: courses.length + 1,
+        name: req.body.name
+    };
+     courses.push(course);
+     res.send(course);
+})
+//update the course PUT
+app.put('/api/courses/:id', (req,res) => {
+    //Look up the course
+    //If not existing return 404
+    const course = courses.find(e => e.id === parseInt(req.params.id));
+    if(!course) res.status(404).send("The course wiht the given id wasn't found");
+    
+    //Otherwise validate the course
+    //If invalid, return 400 - Bad request
+    const schema = Joi.object({
+        name: Joi.string().min(3).required()
+    });
+    const result = schema.validate(req.body)
+    
+    if(result.error){
+        res.status(400).send(result.error.details[0].message);
+        return
+    }
+    //Update the course
+    //Return the updated course
+    course.name = req.body.name;
     res.send(course);
 })
 
@@ -113,26 +160,7 @@ app.post('/api/profs', (req,res) => {
 
 
 
-//Courses
 
-app.post('/api/courses', (req, res) => {
-    const schema = Joi.object({
-        name: Joi.string().min(3).required()
-    });
-    const result = schema.validate(req.body)
-    console.log(result);
-
-    if(result.error){
-        res.status(400).send(result.error.details[0].message);
-        return;
-    }
-    const course = {
-        id: courses.length + 1,
-        name: req.body.name
-    };
-     courses.push(course);
-     res.send(course);
-})
 
 
 const port = process.env.PORT || 5000;
