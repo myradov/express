@@ -119,17 +119,14 @@ app.get('/api/lectures/:id', (req, res) => {
 
 //add to lectures POST
 app.post('/api/lectures', (req,res) => {
-    const schema = Joi.object({
-        name: Joi.string().min(2).required(),
-        prof: Joi.string().required()
-    });
-    const result = schema.validate(req.body)
-    
-    if(result.error){
-        res.status(400).send(result.error.details[0].message);
+    // valide the lecture
+    const { error } = validateLecture(req.body)
+    if(error){
+        res.status(400).send(error.details[0].message)
         return;
     }
     
+    // add the lecture
     const lecture = {
         id: lectures.length + 1,
         name: req.body.name,
@@ -138,6 +135,33 @@ app.post('/api/lectures', (req,res) => {
     lectures.push(lecture);
     res.send(lecture);
 })
+//update the lecture PUT
+app.put('/api/lectures/:id', (req,res) => {
+    //Look up the lecture
+    const lecture  = lectures.find(e => e.id === parseInt(req.params.id));
+    if(!lecture) res.status(404).send("Lecture with the given id was't found");
+
+    //Otherwise validate
+    const { error } = validateLecture(req.body)
+    if(error){
+        res.status(400).send(error.details[0].message)
+        return;
+    }
+
+    //Update the lecture
+    lecture.name = req.body.name;
+    lecture.prof = req.body.prof;
+    res.send(lecture);
+})
+
+function validateLecture(lecture){
+    const schema = Joi.object({
+        name: Joi.string().min(2).required(),
+        prof: Joi.string().required()
+    });
+    return schema.validate(lecture);
+}
+
 
 
 
@@ -175,6 +199,27 @@ app.post('/api/profs', (req,res) => {
     profs.push(prof);
     res.send(prof);
 })
+
+app.put('/api/profs/:id', (req,res) => {
+    const prof = profs.find(e => e.id === parseInt(req.params.id));
+    if(!prof) res.status(404).send("The given prof wasn't found")
+
+    const result = validateProf(req.body);
+    if(result.error){
+        res.status(400).send(result.error.details[0].message)
+        return;
+    }
+
+    prof.name = req.body.name;
+    res.send(prof);
+});
+
+function validateProf(prof){
+    const schema = Joi.object({
+        name: Joi.string().min(3).required()
+    })
+    return schema.validate(prof);
+}
 
 
 
